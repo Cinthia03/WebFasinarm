@@ -1,0 +1,75 @@
+.header {
+  background: linear-gradient(90deg, #1e3c72, #2a5298);
+  color: white;
+  height: 70px;
+  padding: 0 30px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.left-section {
+  display: flex;
+  align-items: center;
+}
+
+.home-btn {
+  color: white;
+  margin-right: 12px;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.titulo {
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.subtitulo {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.right-section {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.school-icon {
+  font-size: 22px;
+  opacity: 0.9;
+}
+
+.version {
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .header {
+    height: 60px;
+    padding: 0 15px;
+  }
+
+  .titulo {
+    font-size: 15px;
+  }
+
+  .subtitulo {
+    display: none;
+  }
+
+  .version {
+    display: none;
+  }
+}

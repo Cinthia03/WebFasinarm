@@ -1,0 +1,38 @@
+.footer {
+  width: 90%;
+  background: linear-gradient(90deg, #1e3c72, #2a5298);
+  color: white;
+  padding: 20px 40px;
+  box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.2);
+  margin-top: auto;
+}
+
+.footer-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.footer h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.footer p {
+  margin: 4px 0;
+  font-size: 14px;
+}
+
+.footer-left,
+.footer-center,
+.footer-right {
+  text-align: center;
+  min-width: 200px;
+}
+
+.footer-center {
+  font-size: 13px;
+  opacity: 0.9;
+}
