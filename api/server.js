@@ -1,22 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const { Pool } = require('pg');
-const multer = require('multer');
-const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
-
-// ================================================
-// CREAR CARPETA UPLOADS
-// ================================================
-const uploadDir = path.join(__dirname, 'uploads');
-
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir);
-}
 
 // ================================================
 // MIDDLEWARE
@@ -28,7 +15,6 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/uploads', express.static(uploadDir));
 
 // ================================================
 // CONEXIÓN SUPABASE
@@ -37,22 +23,6 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
-
-pool.connect()
-  .then(() => console.log('✅ Conectado a Supabase'))
-  .catch(err => console.error('❌ Error conexión DB:', err));
-
-// ================================================
-// MULTER
-// ================================================
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const safeName = file.originalname.replace(/\s+/g, '_');
-    cb(null, Date.now() + '-' + safeName);
-  }
-});
-const upload = multer({ storage });
 
 // ================================================
 // GET TODOS
@@ -72,7 +42,7 @@ app.get('/api/mantenimiento', async (req, res) => {
 // ================================================
 // POST CREAR
 // ================================================
-app.post('/api/mantenimiento', upload.single('archivo'), async (req, res) => {
+app.post('/api/mantenimiento', async (req, res) => {
   try {
 
     const {
@@ -86,7 +56,6 @@ app.post('/api/mantenimiento', upload.single('archivo'), async (req, res) => {
       descripcion
     } = req.body;
 
-    const archivo = req.file ? `/uploads/${req.file.filename}` : null;
     const fecha = new Date();
 
     const query = `
@@ -105,7 +74,7 @@ app.post('/api/mantenimiento', upload.single('archivo'), async (req, res) => {
       equipo,
       asunto,
       descripcion,
-      archivo,
+      null,
       fecha
     ];
 
@@ -140,6 +109,6 @@ app.delete('/api/mantenimiento/:id', async (req, res) => {
 });
 
 // ================================================
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
-});
+// EXPORT PARA VERCEL
+// ================================================
+module.exports = app;
