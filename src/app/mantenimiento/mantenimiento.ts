@@ -34,7 +34,7 @@ export class Mantenimiento {
   selectedFile: File | null = null;
 
   //private API_URL = 'http://localhost:3000/api/mantenimiento'; //SOLO USO LOCAL
-  API_URL = 'https://web-fasinarm.vercel.app/api/mantenimiento';
+  /*API_URL = 'https://web-fasinarm.vercel.app/api/mantenimiento';
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
     this.mantenimientoForm = this.fb.group({
@@ -74,6 +74,42 @@ export class Mantenimiento {
           tipomantenimiento: 'Preventivo'
         });
         this.selectedFile = null;
+      },
+      error: (err) => {
+        alert("❌ Error: " + (err.error?.error || "Servidor no responde"));
+      }
+    });
+  }*/
+
+    API_URL = '/api/mantenimiento';
+
+  constructor(private fb: FormBuilder, private http: HttpClient) {
+    this.mantenimientoForm = this.fb.group({
+      usuario: ['', Validators.required],
+      cedula: ['', Validators.required],
+      ubicacion: ['', Validators.required],
+      prioridad: ['Media', Validators.required],
+      tipomantenimiento: ['Preventivo', Validators.required],
+      equipo: [''],
+      asunto: ['', Validators.required],
+      descripcion: ['', Validators.required]
+    });
+  }
+
+  guardar() {
+    if (this.mantenimientoForm.invalid) {
+      alert("Formulario inválido");
+      return;
+    }
+
+    // 🔥 ENVIAMOS JSON, NO FormData
+    this.http.post(this.API_URL, this.mantenimientoForm.value).subscribe({
+      next: () => {
+        alert("✅ Registro exitoso");
+        this.mantenimientoForm.reset({
+          prioridad: 'Media',
+          tipomantenimiento: 'Preventivo'
+        });
       },
       error: (err) => {
         alert("❌ Error: " + (err.error?.error || "Servidor no responde"));
