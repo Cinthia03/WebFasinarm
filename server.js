@@ -1,153 +1,161 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const mysql = require('mysql2/promise'); 
-const multer = require("multer");
-const fs = require('fs'); // <--- IMPORTANTE: Faltaba este import
+const { Pool } = require('pg'); // ✅ PostgreSQL
+const multer = require('multer');
+const fs = require('fs');
 
-// ================================================
-//           CONFIGURACIÓN APP
-// ================================================
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
-// Asegurar que la carpeta uploads exista (Evita error 500 al subir archivos)
+// ================================================
+//           CREAR CARPETA UPLOADS
+// ================================================
 const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)){
-    fs.mkdirSync(uploadDir);
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir);
 }
 
 // ================================================
-//           MIDDLEWARE 
+//           MIDDLEWARE
 // ================================================
 app.use(cors({
-  origin: 'http://localhost:4200', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  origin: true, // permite cualquier origen (útil para Vercel)
   credentials: true
 }));
 
-// Servir archivos estáticos ANTES de las rutas
-// Esto permite que http://localhost:3000/uploads/nombre.jpg sea accesible
 app.use('/uploads', express.static(uploadDir));
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ================================================
-//           CONEXIÓN MYSQL
+//           CONEXIÓN POSTGRESQL (SUPABASE)
 // ================================================
-const pool = mysql.createPool({
-  host: 'sql10.freesqldatabase.com',
-  port: 3306,
-  database: 'sql10817826',
-  user: 'sql10817826',
-  password: '3tHp4yMKTR',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-  timezone: 'Z' // Ayuda a manejar fechas UTC correctamente
-});
-
-pool.getConnection()
-  .then(() => console.log('✅ Conectado a MySQL Freesqldatabase'))
-  .catch(err => console.error('❌ Error MySQL:', err));
-
-/* ===============================
-   MULTER CONFIG
-=============================== */
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/");
-  },
-  filename: (req, file, cb) => {
-    // Reemplazamos espacios para evitar errores en URLs de navegador
-    const safeName = file.originalname.replace(/\s+/g, '_');
-    cb(null, Date.now() + "-" + safeName);
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
   }
 });
+
+pool.connect()
+  .then(() => console.log('✅ Conectado a PostgreSQL (Supabase)'))
+  .catch(err => console.error('❌ Error conexión DB:', err));
+
+// ================================================
+//           MULTER CONFIG
+// ================================================
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const safeName = file.originalname.replace(/\s+/g, '_');
+    cb(null, Date.now() + '-' + safeName);
+  }
+});
+
 const upload = multer({ storage });
 
 // ================================================
-//           RUTAS MANTENIMIENTO
+//           OBTENER TODOS
 // ================================================
-
-// OBTENER TODOS
 app.get('/mantenimiento', async (req, res) => {
   try {
-    const [rows] = await pool.query(
+    const result = await pool.query(
       'SELECT * FROM mantenimiento ORDER BY id_mantenimiento DESC'
     );
-    res.json(rows);
+
+    res.json(result.rows);
   } catch (err) {
+    console.error('Error GET:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// CREAR REGISTRO (Corregido para insertar fecha y archivo correctamente)
-app.post("/mantenimiento", upload.single("archivo"), async (req, res) => {
+// ================================================
+//           CREAR REGISTRO
+// ================================================
+app.post('/mantenimiento', upload.single('archivo'), async (req, res) => {
   try {
     const data = req.body;
-    // Construimos la URL que Angular usará para mostrar la imagen
-    const archivoUrl = req.file ? `http://localhost:3000/uploads/${req.file.filename}` : null;
 
-    const sql = `INSERT INTO mantenimiento 
-      (usuario, cedula, ubicacion, prioridad, tipoMantenimiento, equipo, asunto, descripcion, archivo, fecha) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`;
+    const archivoUrl = req.file
+      ? `/uploads/${req.file.filename}`
+      : null;
 
-    const [result] = await pool.query(sql, [
-      data.usuario, 
-      data.cedula, 
-      data.ubicacion, 
+    const sql = `
+      INSERT INTO mantenimiento
+      (usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion, archivo, fecha)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,NOW())
+      RETURNING id_mantenimiento
+    `;
+
+    const result = await pool.query(sql, [
+      data.usuario,
+      data.cedula,
+      data.ubicacion,
       data.prioridad,
-      data.tipoMantenimiento, 
-      data.equipo, 
-      data.asunto, 
-      data.descripcion, 
+      data.tipomantenimiento,
+      data.equipo,
+      data.asunto,
+      data.descripcion,
       archivoUrl
     ]);
 
-    res.json({ message: "Guardado correctamente", id: result.insertId });
+    res.json({
+      message: 'Guardado correctamente',
+      id: result.rows[0].id_mantenimiento
+    });
+
   } catch (err) {
-    console.error("❌ Error DB:", err);
-    res.status(500).json({ error: "Error interno", detalle: err.message });
-  }
-});
-
-// ELIMINAR
-app.delete('/mantenimiento/:id', async (req, res) => {
-  try {
-    const idEliminar = req.params.id;
-    const [result] = await pool.query(
-      'DELETE FROM mantenimiento WHERE id_mantenimiento = ?', 
-      [idEliminar]
-    );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'El registro no existe en la base de datos' });
-    }
-
-    res.json({ message: 'Eliminado correctamente' });
-  } catch (err) {
-    console.error("Error en DELETE:", err);
+    console.error('Error POST:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
+// ================================================
+//           ELIMINAR REGISTRO
+// ================================================
+app.delete('/mantenimiento/:id', async (req, res) => {
+  try {
+    const id = req.params.id;
 
+    const result = await pool.query(
+      'DELETE FROM mantenimiento WHERE id_mantenimiento = $1',
+      [id]
+    );
 
+    if (result.rowCount === 0) {
+      return res.status(404).json({
+        message: 'El registro no existe'
+      });
+    }
+
+    res.json({ message: 'Eliminado correctamente' });
+
+  } catch (err) {
+    console.error('Error DELETE:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // ================================================
-//           MANEJO DE ERRORES GLOBAL
+//           MANEJO GLOBAL DE ERRORES
 // ================================================
 app.use((err, req, res, next) => {
-  console.error('Error detectado:', err);
-  res.status(500).json({ message: 'Error interno del servidor', error: err.message });
+  console.error('Error global:', err);
+  res.status(500).json({
+    message: 'Error interno del servidor',
+    error: err.message
+  });
 });
 
 // ================================================
 //           INICIAR SERVIDOR
 // ================================================
 app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
+  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
 });
