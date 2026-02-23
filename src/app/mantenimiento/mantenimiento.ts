@@ -33,7 +33,8 @@ export class Mantenimiento {
   mantenimientoForm: FormGroup;
   selectedFile: File | null = null;
 
-  private API_URL = 'http://localhost:3000/api/mantenimiento';
+  //private API_URL = 'http://localhost:3000/api/mantenimiento'; --SOLO USO LOCAL
+  API_URL = 'https://tu-proyecto-backend.vercel.app/api/mantenimiento';
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
     this.mantenimientoForm = this.fb.group({
