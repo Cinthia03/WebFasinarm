@@ -32,7 +32,8 @@ export class VistaMantenimiento implements OnInit {
   dataSource = new MatTableDataSource<any>();
 
   //apiUrl = 'http://localhost:3000/api/mantenimiento'; //SOLO USO LOCAL
-  apiUrl = 'https://web-fasinarm.vercel.app/api/mantenimiento';
+  //apiUrl = 'https://web-fasinarm.vercel.app/api/mantenimiento';
+  apiUrl = '/api/mantenimiento';
 
   displayedColumns: string[] = [
     'usuario',
@@ -60,7 +61,7 @@ export class VistaMantenimiento implements OnInit {
     this.cargarDatos();
   }
 
-  cargarDatos() {
+  /*cargarDatos() {
     this.http.get<any[]>(this.apiUrl).subscribe(data => {
       this.dataSource = new MatTableDataSource(data);
       this.dataSource.paginator = this.paginator;
@@ -108,4 +109,35 @@ export class VistaMantenimiento implements OnInit {
     });
   }
 }
+}*/
+cargarDatos() {
+    this.http.get<any[]>(this.apiUrl).subscribe({
+      next: (data) => {
+        this.dataSource = new MatTableDataSource(data);
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort;
+      },
+      error: (err) => console.error("Error cargando datos:", err)
+    });
+  }
+
+  eliminar(id: any) {
+    if (!id) {
+      alert("No se pudo identificar el ID del registro.");
+      return;
+    }
+
+    if (confirm('¿Deseas eliminar este registro de forma permanente?')) {
+      this.http.delete(`${this.apiUrl}/${id}`).subscribe({
+        next: () => {
+          alert('Eliminado correctamente');
+          // Actualización local para no recargar toda la página
+          this.dataSource.data = this.dataSource.data.filter(item => 
+            item.id_mantenimiento !== id
+          );
+        },
+        error: (err) => alert("Error al eliminar: " + err.message)
+      });
+    }
+  }
 }
