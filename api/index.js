@@ -5,33 +5,38 @@ const { Pool } = require('pg');
 
 const app = express();
 
-// ================= MIDDLEWARE =================
+// ===== MIDDLEWARE =====
 app.use(cors());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
 
-// ================= CONEXIÓN SUPABASE =================
+// ===== CONEXIÓN SUPABASE =====
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
-// ================= GET =================
+// ===== GET =====
 app.get('/api/mantenimiento', async (req, res) => {
   try {
     const result = await pool.query(
       'SELECT * FROM mantenimiento ORDER BY id_mantenimiento DESC'
     );
-    res.json(result.rows);
-  } catch (err) {
-    console.error('GET error:', err);
-    res.status(500).json({ error: err.message });
+    return res.status(200).json(result.rows);
+  } catch (error) {
+    console.error("GET ERROR:", error);
+    return res.status(500).json({ error: error.message });
   }
 });
 
-// ================= POST =================
+// ===== POST =====
 app.post('/api/mantenimiento', async (req, res) => {
   try {
+
+    console.log("BODY RECIBIDO:", req.body);
+
+    if (!req.body) {
+      return res.status(400).json({ error: "Body no recibido" });
+    }
 
     const {
       usuario,
@@ -45,58 +50,53 @@ app.post('/api/mantenimiento', async (req, res) => {
     } = req.body;
 
     if (!usuario) {
-      return res.status(400).json({ error: "Datos no recibidos correctamente" });
+      return res.status(400).json({ error: "Datos incompletos" });
     }
 
     const fecha = new Date();
 
-    const query = `
-      INSERT INTO mantenimiento 
+    const result = await pool.query(
+      `INSERT INTO mantenimiento 
       (usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion, archivo, fecha)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-      RETURNING *;
-    `;
-
-    const values = [
-      usuario,
-      cedula,
-      ubicacion,
-      prioridad,
-      tipomantenimiento,
-      equipo,
-      asunto,
-      descripcion,
-      null,
-      fecha
-    ];
-
-    const result = await pool.query(query, values);
-
-    res.status(201).json(result.rows[0]);
-
-  } catch (error) {
-    console.error('POST error:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// ================= DELETE =================
-app.delete('/api/mantenimiento/:id', async (req, res) => {
-  try {
-    const id = req.params.id;
-
-    await pool.query(
-      'DELETE FROM mantenimiento WHERE id_mantenimiento = $1',
-      [id]
+      RETURNING *`,
+      [
+        usuario,
+        cedula,
+        ubicacion,
+        prioridad,
+        tipomantenimiento,
+        equipo,
+        asunto,
+        descripcion,
+        null,
+        fecha
+      ]
     );
 
-    res.json({ message: 'Eliminado correctamente' });
+    return res.status(201).json(result.rows[0]);
 
-  } catch (err) {
-    console.error('DELETE error:', err);
-    res.status(500).json({ error: err.message });
+  } catch (error) {
+    console.error("POST ERROR:", error);
+    return res.status(500).json({ error: error.message });
   }
 });
 
-// ================= EXPORT PARA VERCEL =================
-module.exports = app;
+// ===== DELETE =====
+app.delete('/api/mantenimiento/:id', async (req, res) => {
+  try {
+    await pool.query(
+      'DELETE FROM mantenimiento WHERE id_mantenimiento = $1',
+      [req.params.id]
+    );
+    return res.status(200).json({ message: "Eliminado correctamente" });
+  } catch (error) {
+    console.error("DELETE ERROR:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+// 🔥 EXPORT CORRECTO PARA VERCEL
+module.exports = (req, res) => {
+  app(req, res);
+};
