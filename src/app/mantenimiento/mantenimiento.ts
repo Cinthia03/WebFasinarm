@@ -8,6 +8,8 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+
 
 @Component({
   selector: 'app-mantenimiento',
@@ -31,21 +33,19 @@ export class Mantenimiento {
   mantenimientoForm: FormGroup;
   selectedFile: File | null = null;
 
-  constructor(private fb: FormBuilder) {
+  private API_URL = 'http://localhost:3000/mantenimiento';
+
+  constructor(private fb: FormBuilder, private http: HttpClient) {
     this.mantenimientoForm = this.fb.group({
       usuario: ['', Validators.required],
       cedula: ['', Validators.required],
       ubicacion: ['', Validators.required],
       prioridad: ['Media', Validators.required],
-      tipoMantenimiento: ['', Validators.required],
+      tipoMantenimiento: ['Preventivo', Validators.required],
       equipo: [''],
       asunto: ['', Validators.required],
       descripcion: ['', Validators.required]
     });
-  }
-
-  get prioridadSeleccionada(): string {
-    return this.mantenimientoForm.get('prioridad')?.value;
   }
 
   onFileSelected(event: any) {
@@ -53,9 +53,24 @@ export class Mantenimiento {
   }
 
   guardar() {
-    if (this.mantenimientoForm.valid) {
-      console.log('Datos del mantenimiento:', this.mantenimientoForm.value);
-      console.log('Archivo:', this.selectedFile);
+    if (this.mantenimientoForm.invalid) return;
+
+    const formData = new FormData();
+    Object.keys(this.mantenimientoForm.value).forEach(key => {
+      formData.append(key, this.mantenimientoForm.value[key]);
+    });
+
+    if (this.selectedFile) {
+      formData.append('archivo', this.selectedFile);
     }
+
+    this.http.post(this.API_URL, formData).subscribe({
+      next: () => {
+        alert("✅ Registro exitoso");
+        this.mantenimientoForm.reset({ prioridad: 'Media', tipoMantenimiento: 'Preventivo' });
+        this.selectedFile = null;
+      },
+      error: (err) => alert("❌ Error: " + (err.error.detalle || "Servidor no responde"))
+    });
   }
 }

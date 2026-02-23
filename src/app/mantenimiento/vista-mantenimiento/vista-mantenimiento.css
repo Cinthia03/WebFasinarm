@@ -1,0 +1,84 @@
+.card-container {
+  padding: 25px;
+  background: #f4f6f9;
+  border-radius: 12px;
+}
+
+.titulo {
+  text-align: center;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #2c3e50;
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.tabla-container {
+  overflow: auto;
+  border-radius: 10px;
+}
+
+.tabla {
+  width: 100%;
+  background: white;
+  border-radius: 10px;
+}
+
+.descripcion {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: bold;
+  color: white;
+}
+
+.baja {
+  background-color: #2ecc71;
+}
+
+.media {
+  background-color: #f39c12;
+}
+
+.alta {
+  background-color: #e74c3c;
+}
+
+.mini-img {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+  border: 1px solid #ccc;
+}
+
+.btn-archivo {
+  background: #3498db;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.mini-img{
+ width:60px;
+ height:60px;
+ object-fit:cover;
+ border-radius:8px;
+ border:1px solid #ddd;
+}
+
+.btn-archivo{
+ text-decoration:none;
+ font-weight:500;
+}

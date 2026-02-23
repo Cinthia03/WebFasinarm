@@ -9,16 +9,8 @@
   box-sizing: border-box;
   background: white;
   font-family: 'Roboto', sans-serif;
+  font-size: 13px;
 }
-
-.titulo {
-  font-size: 40px;
-  color: white;
-  margin-bottom: 40px; 
-  font-weight: 500;
-  letter-spacing: 1px;
-}
-
 .cards {
   display: flex;
   gap: 30px;

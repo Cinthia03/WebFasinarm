@@ -22,12 +22,12 @@ export class Inicio {
 
   constructor(private router: Router) {}
 
-  irMantenimiento() {
+  RegistroMantenimiento() {
     this.router.navigate(['/mantenimiento']);
   }
 
-  irCalculo() {
-    this.router.navigate(['/']);
+  irVistaMantenimiento() {
+    this.router.navigate(['/vistaMantenimiento']);
   }
 
   irPresupuesto() {
