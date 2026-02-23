@@ -31,7 +31,7 @@ export class VistaMantenimiento implements OnInit {
 
   dataSource = new MatTableDataSource<any>();
 
-  //apiUrl = 'http://localhost:3000/api/mantenimiento'; --SOLO USO LOCAL
+  //apiUrl = 'http://localhost:3000/api/mantenimiento'; //SOLO USO LOCAL
   apiUrl = 'https://web-fasinarm.vercel.app/api/mantenimiento';
 
   displayedColumns: string[] = [

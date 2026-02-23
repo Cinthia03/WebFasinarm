@@ -33,7 +33,7 @@ export class Mantenimiento {
   mantenimientoForm: FormGroup;
   selectedFile: File | null = null;
 
-  //private API_URL = 'http://localhost:3000/api/mantenimiento'; --SOLO USO LOCAL
+  //private API_URL = 'http://localhost:3000/api/mantenimiento'; //SOLO USO LOCAL
   API_URL = 'https://web-fasinarm.vercel.app/api/mantenimiento';
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
