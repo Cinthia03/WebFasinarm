@@ -10,7 +10,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 
-
 @Component({
   selector: 'app-mantenimiento',
   standalone: true,
@@ -23,7 +22,8 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
     MatRadioModule,
     MatButtonModule,
     MatCardModule,
-    MatIconModule
+    MatIconModule,
+    HttpClientModule
   ],
   templateUrl: './mantenimiento.html',
   styleUrls: ['./mantenimiento.css']
@@ -33,7 +33,7 @@ export class Mantenimiento {
   mantenimientoForm: FormGroup;
   selectedFile: File | null = null;
 
-  private API_URL = 'http://localhost:3000/mantenimiento';
+  private API_URL = 'http://localhost:3000/api/mantenimiento';
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
     this.mantenimientoForm = this.fb.group({
@@ -41,7 +41,7 @@ export class Mantenimiento {
       cedula: ['', Validators.required],
       ubicacion: ['', Validators.required],
       prioridad: ['Media', Validators.required],
-      tipoMantenimiento: ['Preventivo', Validators.required],
+      tipomantenimiento: ['Preventivo', Validators.required],
       equipo: [''],
       asunto: ['', Validators.required],
       descripcion: ['', Validators.required]
@@ -56,6 +56,7 @@ export class Mantenimiento {
     if (this.mantenimientoForm.invalid) return;
 
     const formData = new FormData();
+
     Object.keys(this.mantenimientoForm.value).forEach(key => {
       formData.append(key, this.mantenimientoForm.value[key]);
     });
@@ -67,10 +68,15 @@ export class Mantenimiento {
     this.http.post(this.API_URL, formData).subscribe({
       next: () => {
         alert("✅ Registro exitoso");
-        this.mantenimientoForm.reset({ prioridad: 'Media', tipoMantenimiento: 'Preventivo' });
+        this.mantenimientoForm.reset({
+          prioridad: 'Media',
+          tipomantenimiento: 'Preventivo'
+        });
         this.selectedFile = null;
       },
-      error: (err) => alert("❌ Error: " + (err.error.detalle || "Servidor no responde"))
+      error: (err) => {
+        alert("❌ Error: " + (err.error?.error || "Servidor no responde"));
+      }
     });
   }
 }

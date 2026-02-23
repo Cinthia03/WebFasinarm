@@ -31,14 +31,14 @@ export class VistaMantenimiento implements OnInit {
 
   dataSource = new MatTableDataSource<any>();
 
-  apiUrl = 'http://localhost:3000/mantenimiento';
+  apiUrl = 'http://localhost:3000/api/mantenimiento';
 
   displayedColumns: string[] = [
     'usuario',
     'cedula',
     'ubicacion',
     'prioridad',
-    'tipoMantenimiento',
+    'tipomantenimiento',
     'equipo',
     'asunto',
     'descripcion',
