@@ -5,28 +5,18 @@ const { Pool } = require('pg');
 
 const app = express();
 
-// ================================================
-// MIDDLEWARE
-// ================================================
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
-
+// ================= MIDDLEWARE =================
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ================================================
-// CONEXIÓN SUPABASE
-// ================================================
+// ================= CONEXIÓN SUPABASE =================
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
-// ================================================
-// GET TODOS
-// ================================================
+// ================= GET =================
 app.get('/api/mantenimiento', async (req, res) => {
   try {
     const result = await pool.query(
@@ -34,14 +24,12 @@ app.get('/api/mantenimiento', async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    console.error('Error GET:', err);
+    console.error('GET error:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ================================================
-// POST CREAR
-// ================================================
+// ================= POST =================
 app.post('/api/mantenimiento', async (req, res) => {
   try {
 
@@ -55,6 +43,10 @@ app.post('/api/mantenimiento', async (req, res) => {
       asunto,
       descripcion
     } = req.body;
+
+    if (!usuario) {
+      return res.status(400).json({ error: "Datos no recibidos correctamente" });
+    }
 
     const fecha = new Date();
 
@@ -83,14 +75,12 @@ app.post('/api/mantenimiento', async (req, res) => {
     res.status(201).json(result.rows[0]);
 
   } catch (error) {
-    console.error('Error POST:', error);
+    console.error('POST error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// ================================================
-// DELETE
-// ================================================
+// ================= DELETE =================
 app.delete('/api/mantenimiento/:id', async (req, res) => {
   try {
     const id = req.params.id;
@@ -103,12 +93,10 @@ app.delete('/api/mantenimiento/:id', async (req, res) => {
     res.json({ message: 'Eliminado correctamente' });
 
   } catch (err) {
-    console.error('Error DELETE:', err);
+    console.error('DELETE error:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// ================================================
-// EXPORT PARA VERCEL
-// ================================================
+// ================= EXPORT PARA VERCEL =================
 module.exports = app;
