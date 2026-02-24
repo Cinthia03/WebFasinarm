@@ -36,8 +36,8 @@
     "@angular/ssr": "^21.0.5",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
-    "dotenv": "^17.3.1",
-    "express": "^5.2.1",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.1",
     "moment-timezone": "^0.6.0",
     "multer": "^2.0.2",
     "pg": "^8.18.0",
@@ -54,5 +54,19 @@
     "jsdom": "^27.1.0",
     "typescript": "~5.9.2",
     "vitest": "^4.0.8"
-  }
+  },
+  "description": "This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.0.5.",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Cinthia03/WebFasinarm.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Cinthia03/WebFasinarm/issues"
+  },
+  "homepage": "https://github.com/Cinthia03/WebFasinarm#readme"
 }
