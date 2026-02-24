@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, AfterViewInit  } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -14,50 +14,31 @@ import { Router } from '@angular/router';
   selector: 'app-vista-mantenimiento',
   standalone: true,
   imports: [
-    CommonModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule
+    CommonModule, MatTableModule, MatPaginatorModule, MatSortModule,
+    MatButtonModule, MatIconModule, MatFormFieldModule, MatInputModule
   ],
   templateUrl: './vista-mantenimiento.html',
-  styleUrls: ['./vista-mantenimiento.css'],
+  styleUrls: ['./vista-mantenimiento.css']
 })
 export class VistaMantenimiento implements OnInit, AfterViewInit {
 
   dataSource = new MatTableDataSource<any>();
-
-  private apiUrl = window.location.hostname === 'localhost' 
+  private apiUrl = window.location.hostname === 'localhost'
     ? 'http://localhost:3000/api/mantenimiento'
     : 'https://web-fasinarm.vercel.app/api/mantenimiento';
-  
-  displayedColumns: string[] = [
-    'usuario','cedula','ubicacion','prioridad','tipomantenimiento',
-    'equipo','asunto','descripcion','fecha','archivo','acciones'
-  ];
+
+  displayedColumns = ['usuario','cedula','ubicacion','prioridad','tipomantenimiento','equipo','asunto','descripcion','fecha','archivo','acciones'];
 
   @ViewChild(MatPaginator) paginator!: MatPaginator;
   @ViewChild(MatSort) sort!: MatSort;
 
   constructor(private http: HttpClient, private router: Router) {}
 
-  ngOnInit(): void {
-    this.cargarDatos();
-  }
-
-  ngAfterViewInit(): void {
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-  }
+  ngOnInit(): void { this.cargarDatos(); }
+  ngAfterViewInit(): void { this.dataSource.paginator = this.paginator; this.dataSource.sort = this.sort; }
 
   cargarDatos() {
-    this.http.get<any[]>(this.apiUrl).subscribe({
-      next: (data) => this.dataSource.data = data,
-      error: (err) => console.error("Error cargando datos:", err)
-    });
+    this.http.get<any[]>(this.apiUrl).subscribe({ next: data => this.dataSource.data = data });
   }
 
   aplicarFiltro(event: Event) {
@@ -66,28 +47,22 @@ export class VistaMantenimiento implements OnInit, AfterViewInit {
   }
 
   editar(element: any) {
-    this.router.navigate(['/mantenimiento'], { state: { data: element } });
+    this.router.navigate(['/mantenimiento', element.id_mantenimiento]);
   }
-
+  
   eliminar(id: number) {
     if (!id) return alert("ID inválido");
+    if (!confirm('¿Deseas eliminar este registro?')) return;
 
-    if (confirm('¿Deseas eliminar este registro?')) {
-      this.http.delete(`${this.apiUrl}/${id}`).subscribe({
-        next: () => {
-          this.dataSource.data = this.dataSource.data.filter(item => item.id_mantenimiento !== id);
-          alert('Registro eliminado');
-        },
-        error: (err) => alert('Error al eliminar: ' + err.message)
-      });
-    }
+    this.http.delete(`${this.apiUrl}/${id}`).subscribe({
+      next: () => {
+        this.dataSource.data = this.dataSource.data.filter(item => item.id_mantenimiento !== id);
+        alert('Registro eliminado');
+      },
+      error: err => alert('Error al eliminar: ' + err.message)
+    });
   }
 
-  esImagen(url: string): boolean {
-    return url ? /\.(jpg|jpeg|png|gif|webp)$/i.test(url) : false;
-  }
-
-  esPdf(url: string): boolean {
-    return url ? /\.pdf$/i.test(url) : false;
-  }
+  esImagen(url: string) { return url ? /\.(jpg|jpeg|png|gif|webp)$/i.test(url) : false; }
+  esPdf(url: string) { return url ? /\.pdf$/i.test(url) : false; }
 }

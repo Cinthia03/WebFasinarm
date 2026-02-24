@@ -18,13 +18,13 @@
         <td mat-cell *matCellDef="let element">{{element.usuario}}</td>
       </ng-container>
 
-      <!-- Cedula -->
+      <!-- Cédula -->
       <ng-container matColumnDef="cedula">
         <th mat-header-cell *matHeaderCellDef>Cédula</th>
         <td mat-cell *matCellDef="let element">{{element.cedula}}</td>
       </ng-container>
 
-      <!-- Ubicacion -->
+      <!-- Ubicación -->
       <ng-container matColumnDef="ubicacion">
         <th mat-header-cell *matHeaderCellDef>Ubicación</th>
         <td mat-cell *matCellDef="let element">{{element.ubicacion}}</td>
@@ -40,12 +40,10 @@
         </td>
       </ng-container>
 
-      <!-- Tipo -->
+      <!-- Tipo Mantenimiento -->
       <ng-container matColumnDef="tipomantenimiento">
         <th mat-header-cell *matHeaderCellDef>Tipo</th>
-        <td mat-cell *matCellDef="let element">
-          {{element.tipoMantenimiento}}
-        </td>
+        <td mat-cell *matCellDef="let element">{{element.tipomantenimiento}}</td>
       </ng-container>
 
       <!-- Equipo -->
@@ -60,39 +58,32 @@
         <td mat-cell *matCellDef="let element">{{element.asunto}}</td>
       </ng-container>
 
-      <!-- Descripcion -->
+      <!-- Descripción -->
       <ng-container matColumnDef="descripcion">
         <th mat-header-cell *matHeaderCellDef>Descripción</th>
-        <td mat-cell *matCellDef="let element">
-          <div class="descripcion">
-            {{element.descripcion}}
-          </div>
-        </td>
+        <td mat-cell *matCellDef="let element">{{element.descripcion}}</td>
       </ng-container>
 
       <!-- Fecha -->
       <ng-container matColumnDef="fecha">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Fecha</th>
         <td mat-cell *matCellDef="let element">
-          {{element.fecha ? (element.fecha | date:'dd/MM/yyyy HH:mm') : 'Sin fecha' }}
+          {{element.fecha ? (element.fecha | date:'dd/MM/yyyy HH:mm') : 'Sin fecha'}}
         </td>
       </ng-container>
 
       <!-- Archivo -->
       <ng-container matColumnDef="archivo">
-        <th mat-header-cell *matHeaderCellDef> Evidencia </th>
+        <th mat-header-cell *matHeaderCellDef>Evidencia</th>
         <td mat-cell *matCellDef="let element">
-          
           <div *ngIf="element.archivo; else noArchivo">
             <a [href]="element.archivo" target="_blank" mat-icon-button color="primary" title="Ver evidencia">
               <mat-icon>{{ esImagen(element.archivo) ? 'image' : 'insert_drive_file' }}</mat-icon>
             </a>
           </div>
-
           <ng-template #noArchivo>
             <span style="color: #999; font-size: 12px;">Sin adjunto</span>
           </ng-template>
-          
         </td>
       </ng-container>
 
@@ -100,15 +91,12 @@
       <ng-container matColumnDef="acciones">
         <th mat-header-cell *matHeaderCellDef>Acciones</th>
         <td mat-cell *matCellDef="let element">
-
           <button mat-mini-fab color="primary" (click)="editar(element)">
             <mat-icon>edit</mat-icon>
           </button>
-
           <button mat-mini-fab color="warn" (click)="eliminar(element.id_mantenimiento)">
             <mat-icon>delete</mat-icon>
           </button>
-
         </td>
       </ng-container>
 
@@ -117,9 +105,7 @@
 
     </table>
 
-    <mat-paginator [pageSize]="5"
-                   [pageSizeOptions]="[5,10,20]">
-    </mat-paginator>
+    <mat-paginator [pageSize]="5" [pageSizeOptions]="[5,10,20]"></mat-paginator>
 
   </div>
 </div>

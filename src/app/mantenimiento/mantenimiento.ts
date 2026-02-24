@@ -1,4 +1,4 @@
-import { Component, OnInit  } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,6 +10,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'app-mantenimiento',
@@ -22,18 +23,18 @@ import { Router } from '@angular/router';
   templateUrl: './mantenimiento.html',
   styleUrls: ['./mantenimiento.css']
 })
-export class Mantenimiento implements OnInit {
-  mantenimientoForm: FormGroup;
+export class Mantenimiento {
+  mantenimientoForm!: FormGroup;
   selectedFile: File | null = null;
-  form!: FormGroup;
-
-  // 👇 CAMBIA ESTA URL SEGÚN ENTORNO
-  private API_URL = window.location.hostname === 'localhost' 
+  private API_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:3000/api/mantenimiento'
     : 'https://web-fasinarm.vercel.app/api/mantenimiento';
 
-  constructor(private fb: FormBuilder, private http: HttpClient, private router: Router) {
+  constructor(private fb: FormBuilder, private http: HttpClient, private router: Router, private route: ActivatedRoute) {}
+
+  ngOnInit(): void {
     this.mantenimientoForm = this.fb.group({
+      id_mantenimiento: [''],
       usuario: ['', Validators.required],
       cedula: ['', Validators.required],
       ubicacion: ['', Validators.required],
@@ -43,68 +44,41 @@ export class Mantenimiento implements OnInit {
       asunto: ['', Validators.required],
       descripcion: ['', Validators.required]
     });
-  }
 
-  ngOnInit(): void {
-
-    // 🔹 1️⃣ Crear el formulario primero
-    this.form = this.fb.group({
-      id_mantenimiento: [''],
-      usuario: [''],
-      cedula: [''],
-      ubicacion: [''],
-      prioridad: [''],
-      tipomantenimiento: [''],
-      equipo: [''],
-      asunto: [''],
-      descripcion: ['']
-    });
-
-    // 🔹 2️⃣ Luego cargar datos si viene desde editar
-    const navigation = this.router.getCurrentNavigation();
-    const state = navigation?.extras.state as { data: any };
-
-    if (state?.data) {
-      this.form.patchValue(state.data);
+    const id = this.route.snapshot.paramMap.get('id');
+    if (id) {
+      this.http.get(`${this.API_URL}/${id}`).subscribe({
+        next: (data: any) => this.mantenimientoForm.patchValue(data),
+        error: err => console.error('Error cargando registro:', err)
+      });
     }
   }
-
-
-  
 
   onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
-    if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-      console.log('Archivo:', this.selectedFile.name);
-    }
+    if (input.files && input.files.length > 0) this.selectedFile = input.files[0];
   }
 
   guardar() {
-    if (this.mantenimientoForm.invalid) {
-      alert('⚠️ Completa todos los campos obligatorios');
-      return;
-    }
+    if (this.mantenimientoForm.invalid) return alert('⚠️ Completa todos los campos obligatorios');
 
     const formData = new FormData();
     Object.entries(this.mantenimientoForm.value).forEach(([key, value]) => {
-      formData.append(key, value as string);
+      if (value != null) formData.append(key, value as string);
     });
+    if (this.selectedFile) formData.append('archivo', this.selectedFile);
 
-    this.http.post(this.API_URL, formData).subscribe({
-      next: (res) => {
-        console.log('✅ Guardado:', res);
-        alert('🎉 Mantenimiento registrado correctamente');
-        this.mantenimientoForm.reset({
-          prioridad: 'Media',
-          tipomantenimiento: 'Preventivo'
-        });
+    const id = this.mantenimientoForm.value.id_mantenimiento;
+    const httpCall = id ? this.http.put(`${this.API_URL}/${id}`, formData) : this.http.post(this.API_URL, formData);
+
+    httpCall.subscribe({
+      next: () => {
+        alert('🎉 Registro guardado correctamente');
+        this.mantenimientoForm.reset({ prioridad: 'Media', tipomantenimiento: 'Preventivo' });
         this.selectedFile = null;
+        this.router.navigate(['/vistaMantenimiento']);
       },
-      error: (err) => {
-        console.error('❌ Error:', err);
-        alert('❌ Error: ' + (err.error?.error || 'Servidor no responde'));
-      }
+      error: err => alert('❌ Error: ' + (err.error?.error || 'Servidor no responde'))
     });
   }
 }

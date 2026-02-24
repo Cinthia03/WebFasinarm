@@ -1,12 +1,9 @@
 <mat-card class="form-container">
-
   <h2>Registro de Mantenimiento</h2>
 
   <form [formGroup]="mantenimientoForm" (ngSubmit)="guardar()">
 
-    <!-- SECCIÓN 1 -->
-    <h3>Datos de Origen</h3>
-
+    <!-- Datos de Origen -->
     <div class="grid-2">
       <mat-form-field appearance="outline">
         <mat-label>Usuario</mat-label>
@@ -29,16 +26,15 @@
       </mat-select>
     </mat-form-field>
 
-    <label class="section-label">Prioridad</label>
-    <mat-radio-group formControlName="prioridad"  class="radio-group">
-        <mat-radio-button value="Baja" class="radio-baja"> Baja </mat-radio-button>
-        <mat-radio-button value="Media" class="radio-media"> Media </mat-radio-button>
-        <mat-radio-button value="Alta" class="radio-alta"> Alta </mat-radio-button>
+    <label>Prioridad</label>
+    <mat-radio-group formControlName="prioridad" class="radio-group">
+      <mat-radio-button value="Baja">Baja</mat-radio-button>
+      <mat-radio-button value="Media">Media</mat-radio-button>
+      <mat-radio-button value="Alta">Alta</mat-radio-button>
     </mat-radio-group>
 
-    <!-- SECCIÓN 2 -->
-    <h3>Categorización Técnica</h3>
-
+    <!-- Tipo de Mantenimiento -->
+    <label>Tipo de Mantenimiento</label>
     <mat-radio-group formControlName="tipomantenimiento" class="radio-group">
       <mat-radio-button value="Preventivo">Preventivo</mat-radio-button>
       <mat-radio-button value="Correctivo">Correctivo</mat-radio-button>
@@ -50,9 +46,6 @@
       <mat-label>Equipo afectado</mat-label>
       <input matInput formControlName="equipo" placeholder="Ej: Impresora HP, Laptop #15">
     </mat-form-field>
-
-    <!-- SECCIÓN 3 -->
-    <h3>Detalle del Mantenimiento</h3>
 
     <mat-form-field appearance="outline" class="full-width">
       <mat-label>Asunto</mat-label>
@@ -70,9 +63,8 @@
     </div>
 
     <div class="button-container">
-      <button mat-raised-button class="btnform" type="submit" [disabled]="mantenimientoForm.invalid">
-        <mat-icon>build</mat-icon>
-        Registrar Mantenimiento
+      <button mat-raised-button color="primary" type="submit" [disabled]="mantenimientoForm.invalid">
+        <mat-icon>build</mat-icon> Guardar
       </button>
     </div>
 

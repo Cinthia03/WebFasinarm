@@ -18,6 +18,12 @@ export const routes: Routes = [
       import('./mantenimiento/mantenimiento')
         .then(m => m.Mantenimiento)
   },
+  { 
+    path: 'mantenimiento/:id', 
+    loadComponent: () =>
+      import('./mantenimiento/mantenimiento')
+        .then(m => m.Mantenimiento)
+  },
   {
     path: 'vistaMantenimiento',
     loadComponent: () =>

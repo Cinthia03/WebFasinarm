@@ -43,147 +43,92 @@ pool.connect().then(() => console.log('✅ Supabase OK'));
 // RUTAS
 // ============================
 
-// GET
+// GET todos los mantenimientos
 app.get('/api/mantenimiento', async (req, res) => {
   try {
-    const result = await pool.query(
-      'SELECT * FROM mantenimiento ORDER BY id_mantenimiento DESC LIMIT 50'
-    );
+    const result = await pool.query('SELECT * FROM mantenimiento ORDER BY id_mantenimiento DESC LIMIT 50');
     res.json(result.rows);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// POST con MULTER
+// GET por ID
+app.get('/api/mantenimiento/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(
+      'SELECT * FROM mantenimiento WHERE id_mantenimiento = $1',
+      [id]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Registro no encontrado' });
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('❌ Error GET por ID:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// POST nuevo mantenimiento
 app.post('/api/mantenimiento', upload.single('archivo'), async (req, res) => {
   try {
-    console.log('🔍 req.body COMPLETO:', req.body); // 👈 DEBUG
-    
-    const {
-      usuario, cedula, ubicacion, prioridad,
-      tipomantenimiento, equipo, asunto, descripcion
-    } = req.body;
+    const { usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion } = req.body;
+    if (!usuario || !cedula || !ubicacion || !asunto || !descripcion)
+      return res.status(400).json({ error: 'Faltan campos obligatorios' });
 
-    console.log('📊 USUARIO:', usuario); // 👈 VER "jUAN"
-    
-    // Validación específica
-    if (!usuario?.trim()) return res.status(400).json({ error: 'Falta USUARIO' });
-    if (!cedula?.trim()) return res.status(400).json({ error: 'Falta CÉDULA' });
-    if (!ubicacion?.trim()) return res.status(400).json({ error: 'Falta UBICACIÓN' });
-    if (!asunto?.trim()) return res.status(400).json({ error: 'Falta ASUNTO' });
-    if (!descripcion?.trim()) return res.status(400).json({ error: 'Falta DESCRIPCIÓN' });
-
-    // Archivo
     const archivoUrl = req.file ? `http://localhost:3000/uploads/${req.file.filename}` : null;
 
     const query = `
       INSERT INTO mantenimiento 
       (usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion, archivo)
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
       RETURNING *
     `;
-
-    const values = [
-      usuario.trim(), cedula.trim(), ubicacion.trim(),
-      prioridad || 'Media', tipomantenimiento || 'Preventivo',
-      equipo?.trim() || 'N/A', asunto.trim(), descripcion.trim(), archivoUrl
-    ];
-
+    const values = [usuario, cedula, ubicacion, prioridad||'Media', tipomantenimiento||'Preventivo', equipo||'N/A', asunto, descripcion, archivoUrl];
     const result = await pool.query(query, values);
     res.status(201).json(result.rows[0]);
 
   } catch (error) {
-    console.error('❌ Error:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// PUT - actualizar mantenimiento
+// PUT actualizar mantenimiento
 app.put('/api/mantenimiento/:id', upload.single('archivo'), async (req, res) => {
   try {
     const { id } = req.params;
-
-    const {
-      usuario, cedula, ubicacion, prioridad,
-      tipomantenimiento, equipo, asunto, descripcion
-    } = req.body;
-
-    let archivoUrl = null;
-
-    if (req.file) {
-      archivoUrl = `http://localhost:3000/uploads/${req.file.filename}`;
-    }
+    const { usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion } = req.body;
+    const archivoUrl = req.file ? `http://localhost:3000/uploads/${req.file.filename}` : null;
 
     const query = `
       UPDATE mantenimiento SET
-        usuario = $1,
-        cedula = $2,
-        ubicacion = $3,
-        prioridad = $4,
-        tipomantenimiento = $5,
-        equipo = $6,
-        asunto = $7,
-        descripcion = $8,
-        archivo = COALESCE($9, archivo)
-      WHERE id_mantenimiento = $10
-      RETURNING *
+        usuario=$1, cedula=$2, ubicacion=$3, prioridad=$4,
+        tipomantenimiento=$5, equipo=$6, asunto=$7, descripcion=$8,
+        archivo=COALESCE($9, archivo)
+      WHERE id_mantenimiento=$10 RETURNING *
     `;
-
-    const values = [
-      usuario,
-      cedula,
-      ubicacion,
-      prioridad,
-      tipomantenimiento,
-      equipo,
-      asunto,
-      descripcion,
-      archivoUrl,
-      id
-    ];
-
+    const values = [usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion, archivoUrl, id];
     const result = await pool.query(query, values);
 
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Registro no encontrado' });
-    }
-
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Registro no encontrado' });
     res.json(result.rows[0]);
 
   } catch (error) {
-    console.error('❌ Error al actualizar:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// DELETE - eliminar mantenimiento
+// DELETE mantenimiento
 app.delete('/api/mantenimiento/:id', async (req, res) => {
   try {
     const { id } = req.params;
-
-    const result = await pool.query(
-      'DELETE FROM mantenimiento WHERE id_mantenimiento = $1 RETURNING *',
-      [id]
-    );
-
-    if (result.rowCount === 0) {
-      return res.status(404).json({ error: 'Registro no encontrado' });
-    }
-
+    const result = await pool.query('DELETE FROM mantenimiento WHERE id_mantenimiento=$1 RETURNING *', [id]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Registro no encontrado' });
     res.json({ message: 'Eliminado correctamente' });
-
   } catch (error) {
-    console.error('❌ Error al eliminar:', error);
     res.status(500).json({ error: error.message });
   }
 });
 
-
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`🚀 http://localhost:${PORT}`);
-  console.log("🔎 DATABASE_URL ACTUAL:", process.env.DATABASE_URL);
-});
-
-
+app.listen(PORT, () => console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`));
