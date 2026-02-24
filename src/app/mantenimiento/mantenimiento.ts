@@ -84,6 +84,7 @@ export class Mantenimiento {
     API_URL = '/api/mantenimiento';
 
   constructor(private fb: FormBuilder, private http: HttpClient) {
+
     this.mantenimientoForm = this.fb.group({
       usuario: ['', Validators.required],
       cedula: ['', Validators.required],
@@ -96,24 +97,45 @@ export class Mantenimiento {
     });
   }
 
+  // ✅ MÉTODO QUE FALTABA
+  onFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.selectedFile = file;
+      console.log("Archivo seleccionado:", file.name);
+    }
+  }
+
   guardar() {
+
     if (this.mantenimientoForm.invalid) {
       alert("Formulario inválido");
       return;
     }
 
-    // 🔥 ENVIAMOS JSON, NO FormData
-    this.http.post(this.API_URL, this.mantenimientoForm.value).subscribe({
-      next: () => {
-        alert("✅ Registro exitoso");
-        this.mantenimientoForm.reset({
-          prioridad: 'Media',
-          tipomantenimiento: 'Preventivo'
-        });
-      },
-      error: (err) => {
-        alert("❌ Error: " + (err.error?.error || "Servidor no responde"));
-      }
+    const formData = new FormData();
+
+    Object.keys(this.mantenimientoForm.value).forEach(key => {
+      formData.append(key, this.mantenimientoForm.value[key]);
     });
+
+    if (this.selectedFile) {
+      formData.append('archivo', this.selectedFile);
+    }
+
+    this.http.post(this.API_URL, formData)
+      .subscribe({
+        next: () => {
+          alert("✅ Registro exitoso");
+          this.mantenimientoForm.reset({
+            prioridad: 'Media',
+            tipomantenimiento: 'Preventivo'
+          });
+          this.selectedFile = null;
+        },
+        error: (err) => {
+          alert("❌ Error: " + (err.error?.error || "Servidor no responde"));
+        }
+      });
   }
 }

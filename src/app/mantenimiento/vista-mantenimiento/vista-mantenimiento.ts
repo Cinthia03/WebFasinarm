@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit  } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatTableModule, MatTableDataSource } from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
@@ -27,15 +27,14 @@ import { Router } from '@angular/router';
   templateUrl: './vista-mantenimiento.html',
   styleUrls: ['./vista-mantenimiento.css'],
 })
-export class VistaMantenimiento implements OnInit {
+export class VistaMantenimiento implements OnInit, AfterViewInit {
 
   dataSource = new MatTableDataSource<any>();
 
   //apiUrl = 'http://localhost:3000/api/mantenimiento'; //SOLO USO LOCAL
   //apiUrl = 'https://web-fasinarm.vercel.app/api/mantenimiento';
-  apiUrl = '/api/mantenimiento';
 
-  displayedColumns: string[] = [
+  /*displayedColumns: string[] = [
     'usuario',
     'cedula',
     'ubicacion',
@@ -61,7 +60,7 @@ export class VistaMantenimiento implements OnInit {
     this.cargarDatos();
   }
 
-  /*cargarDatos() {
+  cargarDatos() {
     this.http.get<any[]>(this.apiUrl).subscribe(data => {
       this.dataSource = new MatTableDataSource(data);
       this.dataSource.paginator = this.paginator;
@@ -110,14 +109,56 @@ export class VistaMantenimiento implements OnInit {
   }
 }
 }*/
-cargarDatos() {
+apiUrl = '/api/mantenimiento';
+
+  displayedColumns: string[] = [
+    'usuario',
+    'cedula',
+    'ubicacion',
+    'prioridad',
+    'tipomantenimiento',
+    'equipo',
+    'asunto',
+    'descripcion',
+    'fecha',
+    'archivo',
+    'acciones'
+  ];
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
+
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.cargarDatos();
+  }
+
+  ngAfterViewInit(): void {
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
+  }
+
+  cargarDatos() {
     this.http.get<any[]>(this.apiUrl).subscribe({
       next: (data) => {
-        this.dataSource = new MatTableDataSource(data);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
+        this.dataSource.data = data;
       },
       error: (err) => console.error("Error cargando datos:", err)
+    });
+  }
+
+  aplicarFiltro(event: Event) {
+    const filtro = (event.target as HTMLInputElement).value;
+    this.dataSource.filter = filtro.trim().toLowerCase();
+  }
+
+  editar(element: any) {
+    this.router.navigate(['/mantenimiento'], {
+      state: { data: element }
     });
   }
 
@@ -131,8 +172,7 @@ cargarDatos() {
       this.http.delete(`${this.apiUrl}/${id}`).subscribe({
         next: () => {
           alert('Eliminado correctamente');
-          // Actualización local para no recargar toda la página
-          this.dataSource.data = this.dataSource.data.filter(item => 
+          this.dataSource.data = this.dataSource.data.filter(item =>
             item.id_mantenimiento !== id
           );
         },
@@ -140,4 +180,13 @@ cargarDatos() {
       });
     }
   }
+
+  esImagen(url: string): boolean {
+    return url ? /\.(jpg|jpeg|png|gif|webp)$/i.test(url) : false;
+  }
+
+  esPdf(url: string): boolean {
+    return url ? /\.pdf$/i.test(url) : false;
+  }
+
 }
