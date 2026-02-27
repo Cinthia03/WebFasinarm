@@ -1,31 +1,28 @@
 {
   "name": "web-fasinarm-inventario",
-  "version": "1.0.0",
-  "description": "Sistema de Inventario Fasinarm con Angular 21 y Express",
-  "main": "server.js",
-  "type": "commonjs",
+  "version": "0.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --configuration production",
-    "watch": "ng build --watch --configuration development",
+    "build:client": "ng build --output-path=dist/client --configuration production",
+    "build": "npm run build:client",
+    "vercel-build": "npm run build:client",
     "test": "ng test",
-    "serve:ssr": "node server.js"
+    "dev:ssr": "ng run web-fasinarm-inventario:serve-ssr",
+    "serve:ssr": "node dist/web-fasinarm-inventario/server/server.mjs",
+    "prerender": "ng run web-fasinarm-inventario:prerender"
   },
-  "private": true,
   "dependencies": {
-    "@angular/animations": "21.2.0",
-    "@angular/cdk": "21.1.5",
-    "@angular/common": "21.2.0",
-    "@angular/compiler": "21.2.0",
-    "@angular/core": "21.2.0",
-    "@angular/forms": "21.2.0",
-    "@angular/material": "21.1.5",
-    "@angular/platform-browser": "21.2.0",
-    "@angular/platform-browser-dynamic": "21.2.0",
-    "@angular/platform-server": "21.2.0",
-    "@angular/router": "21.2.0",
-    "@angular/ssr": "21.2.0",
+    "@angular/cdk": "~21.1.5",
+    "@angular/common": "^21.0.0",
+    "@angular/compiler": "^21.0.0",
+    "@angular/core": "^21.0.0",
+    "@angular/forms": "^21.0.0",
+    "@angular/material": "~21.1.5",
+    "@angular/platform-browser": "^21.0.0",
+    "@angular/platform-server": "^21.0.0",
+    "@angular/router": "^21.0.0",
+    "@angular/ssr": "^21.0.5",
     "@supabase/supabase-js": "^2.45.4",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
@@ -39,18 +36,13 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular/build": "21.2.0",
-    "@angular/cli": "21.2.0",
-    "@angular/compiler-cli": "21.2.0",
-    "@types/cors": "^2.8.17",
+    "@angular/build": "^21.0.5",
+    "@angular/cli": "^21.0.5",
+    "@angular/compiler-cli": "^21.0.0",
     "@types/express": "^5.0.1",
-    "@types/multer": "^1.4.12",
     "@types/node": "^20.17.19",
-    "@types/pg": "^8.11.10",
     "typescript": "~5.9.2"
   },
-  "engines": {
-    "node": ">=20.0.0"
-  }
+  "main": "server.js",
+  "type": "commonjs"
 }
-
