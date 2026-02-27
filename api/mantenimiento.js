@@ -1,9 +1,7 @@
-import express from 'express';
-import cors from 'cors';
-import { Pool } from 'pg';
-import multer from 'multer';
-import path from 'path';
-import fs from 'fs';
+const express = require('express');
+const cors = require('cors');
+const { Pool } = require('pg');
+const multer = require('multer');
 
 const app = express();
 
@@ -12,23 +10,19 @@ app.use(cors({
   origin: ['http://localhost:4200', 'https://web-fasinarm.vercel.app']
 }));
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// ⚠️ En Vercel NO se pueden guardar archivos en disco permanentemente
-// Se usa memoria en lugar de diskStorage
+// En Vercel usar memoria
 const upload = multer({ storage: multer.memoryStorage() });
 
-// POOL SUPABASE
+// Conexión Supabase
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
-// ============================
-// RUTAS
-// ============================
-
+// GET TODOS
 app.get('/api/mantenimiento', async (req, res) => {
   try {
     const result = await pool.query(
@@ -36,71 +30,33 @@ app.get('/api/mantenimiento', async (req, res) => {
     );
     res.status(200).json(result.rows);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
+// GET POR ID
 app.get('/api/mantenimiento/:id', async (req, res) => {
   try {
-    const { id } = req.params;
     const result = await pool.query(
-      'SELECT * FROM mantenimiento WHERE id_mantenimiento = $1',
-      [id]
+      'SELECT * FROM mantenimiento WHERE id_mantenimiento=$1',
+      [req.params.id]
     );
 
     if (result.rowCount === 0)
       return res.status(404).json({ error: 'Registro no encontrado' });
 
-    res.status(200).json(result.rows[0]);
+    res.json(result.rows[0]);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
-app.post('/api/mantenimiento', upload.single('archivo'), async (req, res) => {
+// POST
+app.post('/api/mantenimiento', upload.none(), async (req, res) => {
   try {
-    const { usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion } = req.body;
-
-    const query = `
-      INSERT INTO mantenimiento 
-      (usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-      RETURNING *
-    `;
-
-    const values = [
-      usuario,
-      cedula,
-      ubicacion,
-      prioridad || 'Media',
-      tipomantenimiento || 'Preventivo',
-      equipo || 'N/A',
-      asunto,
-      descripcion
-    ];
-
-    const result = await pool.query(query, values);
-    res.status(201).json(result.rows[0]);
-
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-app.put('/api/mantenimiento/:id', upload.single('archivo'), async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion } = req.body;
-
-    const query = `
-      UPDATE mantenimiento SET
-        usuario=$1, cedula=$2, ubicacion=$3, prioridad=$4,
-        tipomantenimiento=$5, equipo=$6, asunto=$7, descripcion=$8
-      WHERE id_mantenimiento=$9
-      RETURNING *
-    `;
-
-    const values = [
+    const {
       usuario,
       cedula,
       ubicacion,
@@ -108,39 +64,98 @@ app.put('/api/mantenimiento/:id', upload.single('archivo'), async (req, res) => 
       tipomantenimiento,
       equipo,
       asunto,
-      descripcion,
-      id
-    ];
+      descripcion
+    } = req.body;
 
-    const result = await pool.query(query, values);
+    const result = await pool.query(
+      `INSERT INTO mantenimiento
+      (usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+      RETURNING *`,
+      [
+        usuario,
+        cedula,
+        ubicacion,
+        prioridad || 'Media',
+        tipomantenimiento || 'Preventivo',
+        equipo || 'N/A',
+        asunto,
+        descripcion
+      ]
+    );
 
-    if (result.rowCount === 0)
-      return res.status(404).json({ error: 'Registro no encontrado' });
-
-    res.status(200).json(result.rows[0]);
-
+    res.status(201).json(result.rows[0]);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
-app.delete('/api/mantenimiento/:id', async (req, res) => {
+// PUT
+app.put('/api/mantenimiento/:id', upload.none(), async (req, res) => {
   try {
-    const { id } = req.params;
+    const {
+      usuario,
+      cedula,
+      ubicacion,
+      prioridad,
+      tipomantenimiento,
+      equipo,
+      asunto,
+      descripcion
+    } = req.body;
+
     const result = await pool.query(
-      'DELETE FROM mantenimiento WHERE id_mantenimiento=$1 RETURNING *',
-      [id]
+      `UPDATE mantenimiento SET
+        usuario=$1,
+        cedula=$2,
+        ubicacion=$3,
+        prioridad=$4,
+        tipomantenimiento=$5,
+        equipo=$6,
+        asunto=$7,
+        descripcion=$8
+      WHERE id_mantenimiento=$9
+      RETURNING *`,
+      [
+        usuario,
+        cedula,
+        ubicacion,
+        prioridad,
+        tipomantenimiento,
+        equipo,
+        asunto,
+        descripcion,
+        req.params.id
+      ]
     );
 
     if (result.rowCount === 0)
       return res.status(404).json({ error: 'Registro no encontrado' });
 
-    res.status(200).json({ message: 'Eliminado correctamente' });
-
+    res.json(result.rows[0]);
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 });
 
-// 🔥 Esto reemplaza app.listen()
-export default app;
+// DELETE
+app.delete('/api/mantenimiento/:id', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'DELETE FROM mantenimiento WHERE id_mantenimiento=$1 RETURNING *',
+      [req.params.id]
+    );
+
+    if (result.rowCount === 0)
+      return res.status(404).json({ error: 'Registro no encontrado' });
+
+    res.json({ message: 'Eliminado correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+module.exports = app;
