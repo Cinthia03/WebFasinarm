@@ -4,7 +4,9 @@
     {
       "src": "package.json",
       "use": "@vercel/static-build",
-      "config": { "distDir": "dist/client/browser" }
+      "config": {
+        "distDir": "dist/web-fasinarm-inventario"
+      }
     },
     {
       "src": "server.js",
@@ -12,7 +14,6 @@
     }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "server.js" },
-    { "src": "/(.*)", "dest": "server.js" }
+    { "src": "/api/(.*)", "dest": "server.js" }
   ]
 }
