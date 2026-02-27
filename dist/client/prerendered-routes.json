@@ -1,0 +1,8 @@
+{
+  "routes": {
+    "/": {},
+    "/inicio": {},
+    "/mantenimiento": {},
+    "/vistaMantenimiento": {}
+  }
+}
