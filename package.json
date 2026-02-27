@@ -1,28 +1,28 @@
 {
   "name": "web-fasinarm-inventario",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "Sistema de Inventario Fasinarm con Angular 21 y Express",
+  "main": "server.js",
+  "type": "commonjs",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
-  },
-  "prettier": {
-    "printWidth": 100,
-    "singleQuote": true,
-    "overrides": [{ "files": "*.html", "options": { "parser": "angular" } }]
+    "test": "ng test",
+    "serve:ssr": "node server.js"
   },
   "private": true,
-  "packageManager": "npm@11.6.1",
   "dependencies": {
-    "@angular/cdk": "~21.1.5",
+    "@angular/animations": "^21.0.0",
+    "@angular/cdk": "^21.1.5",
     "@angular/common": "^21.0.0",
     "@angular/compiler": "^21.0.0",
     "@angular/core": "^21.0.0",
     "@angular/forms": "^21.0.0",
-    "@angular/material": "~21.1.5",
+    "@angular/material": "^21.1.5",
     "@angular/platform-browser": "^21.0.0",
+    "@angular/platform-browser-dynamic": "^21.0.0",
     "@angular/platform-server": "^21.0.0",
     "@angular/router": "^21.0.0",
     "@angular/ssr": "^21.0.5",
@@ -35,18 +35,22 @@
     "multer": "^2.0.2",
     "pg": "^8.18.0",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0"
+    "tslib": "^2.3.0",
+    "zone.js": "~0.15.0"
   },
   "devDependencies": {
     "@angular/build": "^21.0.5",
     "@angular/cli": "^21.0.5",
     "@angular/compiler-cli": "^21.0.0",
+    "@types/cors": "^2.8.17",
     "@types/express": "^5.0.1",
+    "@types/multer": "^1.4.12",
     "@types/node": "^20.17.19",
-    "jsdom": "^27.1.0",
-    "typescript": "~5.9.2",
-    "vitest": "^4.0.8"
+    "@types/pg": "^8.11.10",
+    "typescript": "~5.9.2"
   },
-  "main": "server.js",
-  "type": "commonjs"
+  "engines": {
+    "node": ">=20.0.0"
+  }
 }
+
