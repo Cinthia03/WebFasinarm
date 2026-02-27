@@ -1,10 +1,11 @@
-require('dotenv').config();
+/*require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const multer = require('multer');  // 👈 NECESARIO
 const path = require('path');
 const fs = require('fs');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 
@@ -131,4 +132,139 @@ app.delete('/api/mantenimiento/:id', async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`));*/
+
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const { Pool } = require('pg');
+const multer = require('multer');
+const path = require('path');
+const { createClient } = require('@supabase/supabase-js');
+
+const app = express();
+
+// CORS
+app.use(cors({
+  origin: ['http://localhost:4200', 'https://web-fasinarm.vercel.app']
+}));
+
+// JSON + URLENCODED
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// MULTER memoria (no disk en Vercel)
+const upload = multer({ storage: multer.memoryStorage() });
+
+// Supabase Storage
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_KEY
+);
+
+// POOL POSTGRES
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false },
+  connectionTimeoutMillis: 30000
+});
+
+// RUTAS API MANTENIMIENTO
+app.get('/api/mantenimiento', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM mantenimiento ORDER BY id_mantenimiento DESC LIMIT 50');
+    res.json(result.rows);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.get('/api/mantenimiento/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('SELECT * FROM mantenimiento WHERE id_mantenimiento = $1', [id]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Registro no encontrado' });
+    res.json(result.rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/mantenimiento', upload.single('archivo'), async (req, res) => {
+  try {
+    const { usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion } = req.body;
+    if (!usuario || !cedula || !ubicacion || !asunto || !descripcion) {
+      return res.status(400).json({ error: 'Faltan campos obligatorios' });
+    }
+
+    let archivoUrl = null;
+    if (req.file) {
+      const fileName = `${Date.now()}-${req.file.originalname}`;
+      const { data, error } = await supabase.storage
+        .from('mantenimientos')
+        .upload(`files/${fileName}`, req.file.buffer, { contentType: req.file.mimetype });
+      if (error) throw error;
+      archivoUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/mantenimientos/${data.path}`;
+    }
+
+    const query = `
+      INSERT INTO mantenimiento (usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion, archivo)
+      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *
+    `;
+    const values = [usuario, cedula, ubicacion, prioridad || 'Media', tipomantenimiento || 'Preventivo', equipo || 'N/A', asunto, descripcion, archivoUrl];
+    const result = await pool.query(query, values);
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('POST Error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.put('/api/mantenimiento/:id', upload.single('archivo'), async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion } = req.body;
+    let archivoUrl = req.body.archivo || null;
+
+    if (req.file) {
+      const fileName = `${Date.now()}-${req.file.originalname}`;
+      const { data, error } = await supabase.storage
+        .from('mantenimientos')
+        .upload(`files/${fileName}`, req.file.buffer, { contentType: req.file.mimetype });
+      if (error) throw error;
+      archivoUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/mantenimientos/${data.path}`;
+    }
+
+    const query = `
+      UPDATE mantenimiento SET usuario=$1, cedula=$2, ubicacion=$3, prioridad=$4, tipomantenimiento=$5, 
+      equipo=$6, asunto=$7, descripcion=$8, archivo=COALESCE($9, archivo)
+      WHERE id_mantenimiento=$10 RETURNING *
+    `;
+    const values = [usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion, archivoUrl, id];
+    const result = await pool.query(query, values);
+
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Registro no encontrado' });
+    res.json(result.rows[0]);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.delete('/api/mantenimiento/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query('DELETE FROM mantenimiento WHERE id_mantenimiento=$1 RETURNING *', [id]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'Registro no encontrado' });
+    res.json({ message: 'Eliminado correctamente' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// SERVIR FRONTEND ANGULAR (SPA)
+app.use(express.static(path.join(__dirname, 'dist/client')));
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'dist/client', 'index.html'));
+});
+
+module.exports = app;
