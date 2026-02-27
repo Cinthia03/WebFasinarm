@@ -143,6 +143,7 @@ const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
+console.log("DATABASE_URL:", process.env.DATABASE_URL);
 
 // Middleware
 app.use(cors({ origin: ['http://localhost:4200', 'https://web-fasinarm.vercel.app'] }));
@@ -276,4 +277,6 @@ app.get('*', (req, res) => {
   }
 });
 
-module.exports = app;
+module.exports = (req, res) => {
+  return app(req, res);
+};
