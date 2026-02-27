@@ -1,4 +1,4 @@
-import {
+/*import {
   AngularNodeAppEngine,
   createNodeRequestHandler,
   isMainModule,
@@ -12,7 +12,6 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 const app = express();
 const angularApp = new AngularNodeAppEngine();
 
-/* ✅ FIX CSP */
 app.use((req, res, next) => {
   res.setHeader(
     'Content-Security-Policy',
@@ -29,7 +28,6 @@ app.use((req, res, next) => {
   next();
 });
 
-/* Static */
 app.use(
   express.static(browserDistFolder, {
     maxAge: '1y',
@@ -38,7 +36,7 @@ app.use(
   }),
 );
 
-/* SSR Render */
+
 app.use((req, res, next) => {
   angularApp
     .handle(req)
@@ -48,7 +46,7 @@ app.use((req, res, next) => {
     .catch(next);
 });
 
-/* Listen */
+
 if (isMainModule(import.meta.url) || process.env['pm_id']) {
   const port = process.env['PORT'] || 4000;
   app.listen(port, (error) => {
@@ -57,4 +55,4 @@ if (isMainModule(import.meta.url) || process.env['pm_id']) {
   });
 }
 
-export const reqHandler = createNodeRequestHandler(app);
+export const reqHandler = createNodeRequestHandler(app);*/

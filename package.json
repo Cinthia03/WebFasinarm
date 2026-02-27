@@ -4,12 +4,9 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build && npm run build:server",
-    "build:client": "ng build --output-path dist/client",
-    "build:server": "ng build --configuration=production && tsc server.ts --outDir dist/server",
+    "build": "ng build --configuration production",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test",
-    "serve:ssr": "node dist/server/server.mjs"
+    "test": "ng test"
   },
   "prettier": {
     "printWidth": 100,
