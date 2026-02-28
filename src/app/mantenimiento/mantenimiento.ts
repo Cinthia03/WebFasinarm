@@ -118,13 +118,16 @@ export class Mantenimiento implements OnInit {
     private http: HttpClient, 
     private router: Router, 
     private route: ActivatedRoute,
-    @Inject(PLATFORM_ID) private platformId: Object // Inyectamos el ID de plataforma
+    @Inject(PLATFORM_ID) private platformId: Object
   ) {
-    // Definimos la URL solo en el navegador para evitar errores en Vercel
     if (isPlatformBrowser(this.platformId)) {
-      this.API_URL = window.location.hostname === 'localhost'
-        ? 'http://localhost:3000/api/mantenimiento'
-        : 'https://web-fasinarm.vercel.app/api/mantenimiento';
+      // Si estamos en Vercel, usamos la ruta relativa '/'
+      // Si estamos en Local (ng serve), usamos la URL completa del servidor Express
+      const isLocal = window.location.hostname === 'localhost';
+      
+      this.API_URL = isLocal 
+        ? 'http://localhost:3000/api/mantenimiento' 
+        : '/api/mantenimiento';
     }
   }
 

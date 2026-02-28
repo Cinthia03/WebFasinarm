@@ -147,7 +147,17 @@ console.log("DATABASE_URL:", process.env.DATABASE_URL);
 
 // Middleware
 //app.use(cors({ origin: ['http://localhost:4200', 'https://web-fasinarm.vercel.app'] }));
-app.use(cors());
+app.use(cors({
+  origin: function (origin, callback) {
+    // Permite localhost, tu dominio principal y cualquier subdominio de vercel.app
+    if (!origin || origin.includes('localhost') || origin.includes('vercel.app')) {
+      callback(null, true);
+    } else {
+      callback(new Error('No permitido por CORS'));
+    }
+  }
+}));
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 const upload = multer({ storage: multer.memoryStorage() });
