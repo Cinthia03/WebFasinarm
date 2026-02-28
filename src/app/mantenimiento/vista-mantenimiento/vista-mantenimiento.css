@@ -1,7 +1,9 @@
 .card-container {
-  padding: 25px;
+  padding: 20px;
   background: #f4f6f9;
   border-radius: 12px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .titulo {
@@ -17,28 +19,39 @@
 }
 
 .tabla-container {
-  overflow: auto;
+  width: 100%;
+  overflow-x: auto; /* 🔥 scroll horizontal inteligente */
   border-radius: 10px;
 }
 
 .tabla {
   width: 100%;
+  min-width: 1100px; /* 🔥 evita que se rompa */
   background: white;
   border-radius: 10px;
 }
 
-.descripcion {
+/* Texto largo */
+.mat-cell, .mat-header-cell {
+  padding: 12px 16px;
+  font-size: 14px;
+}
+
+/* Descripción */
+.mat-column-descripcion {
   max-width: 200px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
+/* Badges */
 .badge {
   padding: 4px 10px;
   border-radius: 20px;
   font-weight: bold;
   color: white;
+  font-size: 12px;
 }
 
 .baja {
@@ -53,6 +66,7 @@
   background-color: #e74c3c;
 }
 
+/* Imagen miniatura */
 .mini-img {
   width: 50px;
   height: 50px;
@@ -61,24 +75,33 @@
   border: 1px solid #ccc;
 }
 
-.btn-archivo {
-  background: #3498db;
-  color: white;
-  padding: 5px 10px;
-  border-radius: 6px;
-  text-decoration: none;
-  font-size: 12px;
+/* Botones acciones */
+.mat-column-acciones {
+  text-align: center;
+  width: 120px;
 }
 
-.mini-img{
- width:60px;
- height:60px;
- object-fit:cover;
- border-radius:8px;
- border:1px solid #ddd;
-}
+/* 🔥 RESPONSIVE REAL */
+@media (max-width: 768px) {
 
-.btn-archivo{
- text-decoration:none;
- font-weight:500;
+  .tabla {
+    min-width: 900px;
+  }
+
+  .mat-cell,
+  .mat-header-cell {
+    font-size: 12px;
+    padding: 8px;
+  }
+
+  .badge {
+    font-size: 10px;
+    padding: 3px 8px;
+  }
+
+  .mini-img {
+    width: 40px;
+    height: 40px;
+  }
+
 }
