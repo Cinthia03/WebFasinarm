@@ -165,7 +165,7 @@ const pool = new Pool({
 
 
 // API ROUTES
-app.get('/api/mantenimiento', async (req, res) => {
+app.get('/mantenimiento', async (req, res) => {
   try {
     const result = await pool.query('SELECT * FROM mantenimiento ORDER BY id_mantenimiento DESC LIMIT 50');
     res.json(result.rows);
@@ -175,7 +175,7 @@ app.get('/api/mantenimiento', async (req, res) => {
   }
 });
 
-app.get('/api/mantenimiento/:id', async (req, res) => {
+app.get('/mantenimiento/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query('SELECT * FROM mantenimiento WHERE id_mantenimiento = $1', [id]);
@@ -186,7 +186,7 @@ app.get('/api/mantenimiento/:id', async (req, res) => {
   }
 });
 
-app.post('/api/mantenimiento', upload.single('archivo'), async (req, res) => {
+app.post('/mantenimiento', upload.single('archivo'), async (req, res) => {
   try {
     const { usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion } = req.body;
     if (!usuario || !cedula || !ubicacion || !asunto || !descripcion) {
@@ -219,7 +219,7 @@ app.post('/api/mantenimiento', upload.single('archivo'), async (req, res) => {
   }
 });
 
-app.put('/api/mantenimiento/:id', upload.single('archivo'), async (req, res) => {
+app.put('/mantenimiento/:id', upload.single('archivo'), async (req, res) => {
   try {
     const { id } = req.params;
     const { usuario, cedula, ubicacion, prioridad, tipomantenimiento, equipo, asunto, descripcion } = req.body;
@@ -251,7 +251,7 @@ app.put('/api/mantenimiento/:id', upload.single('archivo'), async (req, res) => 
   }
 });
 
-app.delete('/api/mantenimiento/:id', async (req, res) => {
+app.delete('/mantenimiento/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query('DELETE FROM mantenimiento WHERE id_mantenimiento=$1 RETURNING *', [id]);
@@ -263,7 +263,7 @@ app.delete('/api/mantenimiento/:id', async (req, res) => {
 });
 
 // Frontend Angular SPA
-const distPath = path.join(process.cwd(), 'dist', 'client');
+/*const distPath = path.join(process.cwd(), 'dist', 'client');
 app.use('/assets', express.static(distPath));
 app.use(express.static(distPath));
 
@@ -276,7 +276,7 @@ app.get('*', (req, res) => {
       }
     });
   }
-});
+});*/
 
 // Servidor local (solo desarrollo)
 if (require.main === module) {
