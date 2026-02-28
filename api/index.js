@@ -146,7 +146,7 @@ const app = express();
 console.log("DATABASE_URL:", process.env.DATABASE_URL);
 
 // Middleware
-app.use(cors({ origin: ['http://localhost:4200', 'https://web-fasinarm-publica.vercel.app'] }));
+app.use(cors({ origin: ['http://localhost:4200', 'https://web-fasinarm.vercel.app'] }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 const upload = multer({ storage: multer.memoryStorage() });

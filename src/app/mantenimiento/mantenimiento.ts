@@ -124,7 +124,7 @@ export class Mantenimiento implements OnInit {
     if (isPlatformBrowser(this.platformId)) {
       this.API_URL = window.location.hostname === 'localhost'
         ? 'http://localhost:3000/api/mantenimiento'
-        : 'https://web-fasinarm-publica.vercel.app/api/mantenimiento';
+        : 'https://web-fasinarm.vercel.app/api/mantenimiento';
     }
   }
 
