@@ -154,16 +154,12 @@ export class VistaMantenimiento implements OnInit, AfterViewInit {
 
   async cargarDatos() {
     this.cargando = true;
-
     const { data, error } = await this.supabaseService.getMantenimientos();
-
     this.cargando = false;
-
     if (error) {
       alert(error.message);
       return;
     }
-
     this.dataSource.data = data || [];
   }
 
@@ -178,14 +174,11 @@ export class VistaMantenimiento implements OnInit, AfterViewInit {
 
   async eliminar(id: number) {
     if (!confirm('¿Eliminar registro?')) return;
-
     const { error } = await this.supabaseService.deleteMantenimiento(id);
-
     if (error) {
       alert(error.message);
       return;
     }
-
     this.cargarDatos();
   }
 

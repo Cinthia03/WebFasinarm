@@ -27,7 +27,12 @@ export class Inicio {
   }
 
   irVistaMantenimiento() {
-    this.router.navigate(['/vistaMantenimiento']);
+    const codigo = prompt("Ingrese el código de acceso:");
+    if (codigo === "4859") { 
+      this.router.navigate(['/vistaMantenimiento']);
+    } else {
+      alert("Código incorrecto");
+    }
   }
 
   irPresupuesto() {

@@ -6,9 +6,7 @@ import { environment } from '../environments/environment';
   providedIn: 'root'
 })
 export class SupabaseService {
-
   private supabase: SupabaseClient;
-
   constructor() {
     this.supabase = createClient(
       environment.supabaseUrl,
@@ -58,17 +56,21 @@ export class SupabaseService {
 
   async uploadFile(file: File) {
     const fileName = `${Date.now()}-${file.name}`;
-
     const { data, error } = await this.supabase.storage
       .from('mantenimientos')
       .upload(`files/${fileName}`, file, { upsert: true });
-
-    if (error) throw error;
-
-    const { data: publicUrl } = this.supabase.storage
+    if (error) {
+      console.error('Error uploading file:', error);
+      throw error;  
+    }
+    if (!data) {
+      throw new Error('No data returned from upload');
+    }
+    console.log('Upload data:', data);  // Para debug
+    const { data: urlData } = this.supabase.storage
       .from('mantenimientos')
       .getPublicUrl(data.path);
 
-    return publicUrl.publicUrl;
+    return urlData.publicUrl;
   }
 }
