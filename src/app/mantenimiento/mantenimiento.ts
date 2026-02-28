@@ -195,53 +195,51 @@ export class Mantenimiento implements OnInit {
    ⭐ Guardar registro (SUPER ESTABLE)
    */
   async guardar() {
-
     if (this.mantenimientoForm.invalid) {
       alert('Completa los campos obligatorios');
       return;
     }
+    try {
+      const raw = this.mantenimientoForm.getRawValue();
+      let archivoUrl = raw.archivo;
+        if (this.selectedFile) {
+          archivoUrl = await this.supabaseService.uploadFile(this.selectedFile);
+        }
 
-    let archivoUrl = this.mantenimientoForm.value.archivo;
+      const formData: any = {
+        usuario: raw.usuario,
+        cedula: raw.cedula,
+        ubicacion: raw.ubicacion,
+        prioridad: raw.prioridad,
+        tipomantenimiento: raw.tipomantenimiento,
+        equipo: raw.equipo,
+        asunto: raw.asunto,
+        descripcion: raw.descripcion,
+        archivo: archivoUrl
+      };
 
-    if (this.selectedFile) {
-      archivoUrl =
-        await this.supabaseService.uploadFile(this.selectedFile);
+      const id = raw.id_mantenimiento;
+      let response;
+
+        if (id) {
+          response =
+            await this.supabaseService.updateMantenimiento(id, formData);
+        } else {
+          response =
+            await this.supabaseService.createMantenimiento(formData);
+        }
+
+        if (response.error) {
+          alert(response.error.message);
+          return;
+        }
+
+      alert('Registro guardado correctamente');
+      this.router.navigate(['/vistaMantenimiento']);
+
+    } catch (error) {
+      console.error(error);
+      alert('Error al guardar');
     }
-
-    // 🔥 LIMPIAR DATA ANTES DE ENVIAR
-    const raw = this.mantenimientoForm.value;
-
-    const formData: any = {};
-
-    Object.keys(raw).forEach(key => {
-      const value = raw[key];
-
-      if (value !== null && value !== undefined && value !== '') {
-        formData[key] = value;
-      }
-    });
-
-    formData.archivo = archivoUrl;
-
-    const id = formData.id_mantenimiento;
-
-    let response;
-
-    if (id) {
-      response =
-        await this.supabaseService.updateMantenimiento(id, formData);
-    } else {
-      response =
-        await this.supabaseService.createMantenimiento(formData);
-    }
-
-    if (response.error) {
-      alert(response.error.message);
-      return;
-    }
-
-    alert('Registro guardado correctamente');
-
-    this.router.navigate(['/vistaMantenimiento']);
   }
 }
