@@ -134,7 +134,7 @@ app.delete('/api/mantenimiento/:id', async (req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`));*/
 
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../.env') });
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
@@ -162,6 +162,7 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false },
   connectionTimeoutMillis: 30000
 });
+
 
 // API ROUTES
 app.get('/api/mantenimiento', async (req, res) => {
@@ -276,6 +277,16 @@ app.get('*', (req, res) => {
     });
   }
 });
+
+// Servidor local (solo desarrollo)
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`🚀 API Server: http://localhost:${PORT}`);
+    console.log(`📊 Test: http://localhost:${PORT}/mantenimiento`);
+  });
+}
+
 
 module.exports = (req, res) => {
   return app(req, res);
