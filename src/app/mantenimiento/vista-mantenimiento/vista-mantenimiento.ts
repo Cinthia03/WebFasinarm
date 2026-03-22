@@ -90,6 +90,59 @@ export class VistaMantenimiento implements OnInit, AfterViewInit {
     this.dataSource.filter = filterValue.trim().toLowerCase();
   }
 
+  imprimir() {
+    const contenido = document.getElementById('tabla-imprimir')?.innerHTML;
+    if (!contenido) return;
+    const ventana = window.open('', '', 'width=1000,height=800');
+    if (ventana) {
+      ventana.document.write(`
+        <html>
+          <head>
+            <title>Reporte de Mantenimiento</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+              table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+              th, td { border: 1px solid #ccc; padding: 8px; text-align: left; font-size: 11px; }
+              th { background-color: #f4f4f4; }
+              
+              /* --- OCULTAR ELEMENTOS NO DESEADOS --- */
+              
+              /* Ocultar la columna de Acciones (th y td) */
+              .mat-column-acciones, 
+              th:last-child, 
+              td:last-child { 
+                display: none !important; 
+              }
+
+              /* Ocultar flechas de ordenamiento de Angular Material */
+              .mat-sort-header-arrow { display: none !important; }
+              
+              /* Ocultar el paginador si se coló en el innerHTML */
+              mat-paginator, .mat-mdc-paginator { display: none !important; }
+
+              /* Ajustar badges de prioridad para que se vean bien en blanco y negro */
+              .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; text-transform: uppercase; }
+              .alta { color: red; }
+              .media { color: orange; }
+              .baja { color: green; }
+
+              h2 { text-align: center; color: #1a3a63; }
+            </style>
+          </head>
+          <body>
+            <h2>Registros de Mantenimiento</h2>
+            ${contenido}
+          </body>
+        </html>
+      `);
+      ventana.document.close();
+      setTimeout(() => {
+        ventana.print();
+        ventana.close();
+      }, 500);
+    }
+  }
+
   editar(element: any) {
     this.router.navigate(['/mantenimiento', element.id_mantenimiento]);
   }

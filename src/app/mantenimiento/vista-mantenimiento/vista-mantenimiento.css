@@ -13,9 +13,41 @@
   color: #2c3e50;
 }
 
-.full-width {
+.toolbar {
+  display: flex;
+  align-items: flex-start; 
+  gap: 16px;            
   width: 100%;
   margin-bottom: 20px;
+}
+
+.full-width {
+  flex: 1;                
+  margin-bottom: 0;       
+}
+
+button.btn-print {
+  height: 56px;      
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;           
+  padding: 0 24px;
+  border-radius: 28px; 
+  white-space: nowrap;
+  color: black;
+  background-color: white;
+}
+
+.btn-print:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px #7bff003b;
+  background: #7bff003b;
+  color: black;
+}
+
+.btn-print mat-icon {
+  margin-right: 8px;
 }
 
 .tabla-container {
