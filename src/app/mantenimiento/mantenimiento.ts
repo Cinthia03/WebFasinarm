@@ -11,7 +11,7 @@ import { MatRadioModule } from '@angular/material/radio';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
-
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 @Component({
   selector: 'app-mantenimiento',
   standalone: true,
@@ -24,7 +24,8 @@ import { MatIconModule } from '@angular/material/icon';
     MatRadioModule,
     MatButtonModule,
     MatCardModule,
-    MatIconModule
+    MatIconModule,
+    MatProgressSpinnerModule
   ],
   templateUrl: './mantenimiento.html',
   styleUrls: ['./mantenimiento.css']
@@ -44,21 +45,45 @@ export class Mantenimiento implements OnInit {
   ngOnInit(): void {
     this.mantenimientoForm = this.fb.group({
       id_mantenimiento: [null],
+      codigo: ['', Validators.required],
       usuario: ['', Validators.required],
       cedula: ['', Validators.required],
       ubicacion: ['', Validators.required],
       prioridad: ['Media'],
       tipomantenimiento: ['Preventivo'],
-      equipo: [''],
+      motivo_baja: [''],
+      equipo: ['', Validators.required],
       asunto: ['', Validators.required],
       descripcion: ['', Validators.required],
       archivo: ['']
     });
 
+    this.manejarTipoMantenimiento();
+
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.cargarRegistro(Number(id));
     }
+  }
+
+  onInput(event: any) {
+    event.target.value = event.target.value.replace(/[^0-9]/g, '');
+  }
+
+  manejarTipoMantenimiento() {
+    this.mantenimientoForm.get('tipomantenimiento')?.valueChanges.subscribe(valor => {
+
+      const motivo = this.mantenimientoForm.get('motivo_baja');
+
+      if (valor === 'Solicitud De Baja') {
+        motivo?.setValidators([Validators.required]);
+      } else {
+        motivo?.clearValidators();
+        motivo?.setValue('');
+      }
+
+      motivo?.updateValueAndValidity();
+    });
   }
 
   async cargarRegistro(id: number) {
@@ -105,11 +130,15 @@ export class Mantenimiento implements OnInit {
         }
       }
       const formData: any = {
+        codigo: raw.codigo,
         usuario: raw.usuario,
         cedula: raw.cedula,
         ubicacion: raw.ubicacion,
         prioridad: raw.prioridad,
         tipomantenimiento: raw.tipomantenimiento,
+        motivo_baja: raw.tipomantenimiento === 'Solicitud De Baja' 
+          ? raw.motivo_baja 
+          : null,
         equipo: raw.equipo,
         asunto: raw.asunto,
         descripcion: raw.descripcion,

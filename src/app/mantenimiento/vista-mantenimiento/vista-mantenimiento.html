@@ -12,6 +12,12 @@
 
     <table mat-table [dataSource]="dataSource" matSort class="mat-elevation-z8 tabla">
 
+      <!-- Codigo -->
+      <ng-container matColumnDef="codigo">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Codigo</th>
+        <td mat-cell *matCellDef="let element">{{element.codigo}}</td>
+      </ng-container>
+
       <!-- Usuario -->
       <ng-container matColumnDef="usuario">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Usuario</th>
@@ -43,7 +49,19 @@
       <!-- Tipo Mantenimiento -->
       <ng-container matColumnDef="tipomantenimiento">
         <th mat-header-cell *matHeaderCellDef>Tipo</th>
-        <td mat-cell *matCellDef="let element">{{element.tipomantenimiento}}</td>
+         <td mat-cell *matCellDef="let element">
+          <span *ngIf="element.tipomantenimiento !== 'Solicitud De Baja'">
+            {{ element.tipomantenimiento }}
+          </span>
+          <span *ngIf="element.tipomantenimiento === 'Solicitud De Baja'">
+            Solicitud De Baja
+            <br>
+            <small class="motivo-baja">
+              {{ traducirMotivo(element.motivo_baja) }}
+            </small>
+          </span>
+
+        </td>
       </ng-container>
 
       <!-- Equipo -->

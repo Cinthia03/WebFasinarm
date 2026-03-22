@@ -1,72 +1,116 @@
-<mat-card class="form-container">
-  <h2>Registro de Mantenimiento</h2>
+<div class="form-wrapper">
 
-  <form [formGroup]="mantenimientoForm" (ngSubmit)="guardar()">
+  <h2>REGISTRO DE MANTENIMIENTO</h2>
 
-    <!-- Datos de Origen -->
-    <div class="grid-2">
-      <mat-form-field appearance="outline">
-        <mat-label>Usuario</mat-label>
-        <input matInput formControlName="usuario" placeholder="Ej: Juan Pérez">
+  <form [formGroup]="mantenimientoForm" (ngSubmit)="guardar()" class="form-container">
+
+    <!-- INFORMACIÓN GENERAL -->
+    <div class="section">
+      <h3>Información General</h3>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Código</mat-label>
+        <input matInput formControlName="codigo">
       </mat-form-field>
 
-      <mat-form-field appearance="outline">
-        <mat-label>ID / Cédula</mat-label>
-        <input matInput formControlName="cedula">
+      <div class="grid-2">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Usuario</mat-label>
+          <input matInput formControlName="usuario" placeholder="Ej: Juan Pérez">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Cédula</mat-label>
+          <input matInput 
+                formControlName="cedula" 
+                #input 
+                maxlength="10"
+                placeholder="Ex. 0123456789"
+                (input)="onInput($event)">
+          <mat-hint align="end">{{ input.value.length }}/10</mat-hint>
+        </mat-form-field>
+      </div>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Ubicación</mat-label>
+        <input matInput formControlName="ubicacion" placeholder="Ej: Aula 101 - Laboratorio A ...">
       </mat-form-field>
     </div>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Ubicación</mat-label>
-      <mat-select formControlName="ubicacion">
-        <mat-option value="Aula 101">Aula 101</mat-option>
-        <mat-option value="Laboratorio A">Laboratorio A</mat-option>
-        <mat-option value="Administración">Administración</mat-option>
-        <mat-option value="Biblioteca">Biblioteca</mat-option>
-      </mat-select>
-    </mat-form-field>
+    <!-- CLASIFICACIÓN -->
+    <div class="section">
+      <h3>Clasificación</h3>
 
-    <label>Prioridad</label>
-    <mat-radio-group formControlName="prioridad" class="radio-group">
-      <mat-radio-button value="Baja">Baja</mat-radio-button>
-      <mat-radio-button value="Media">Media</mat-radio-button>
-      <mat-radio-button value="Alta">Alta</mat-radio-button>
-    </mat-radio-group>
+      <label class="section-label">Prioridad</label>
+      <mat-radio-group formControlName="prioridad" class="radio-group chips">
+        <mat-radio-button class="chip baja" value="Baja">Baja</mat-radio-button>
+        <mat-radio-button class="chip media" value="Media">Media</mat-radio-button>
+        <mat-radio-button class="chip alta" value="Alta">Alta</mat-radio-button>
+      </mat-radio-group>
 
-    <!-- Tipo de Mantenimiento -->
-    <label>Tipo de Mantenimiento</label>
-    <mat-radio-group formControlName="tipomantenimiento" class="radio-group">
-      <mat-radio-button value="Preventivo">Preventivo</mat-radio-button>
-      <mat-radio-button value="Correctivo">Correctivo</mat-radio-button>
-      <mat-radio-button value="Actualizacion">Actualización</mat-radio-button>
-      <mat-radio-button value="Redes">Redes / Conectividad</mat-radio-button>
-    </mat-radio-group>
+      <label class="section-label">Tipo de Mantenimiento</label>
+      <mat-radio-group formControlName="tipomantenimiento" class="radio-group chips">
+        <mat-radio-button class="chip" value="Preventivo">Preventivo</mat-radio-button>
+        <mat-radio-button class="chip" value="Correctivo">Correctivo</mat-radio-button>
+        <mat-radio-button class="chip" value="Actualizacion">Actualización</mat-radio-button>
+        <mat-radio-button class="chip" value="Redes">Redes</mat-radio-button>
+        <mat-radio-button class="chip" value="Solicitud De Baja">Solicitud De Baja</mat-radio-button>
+      </mat-radio-group>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Equipo afectado</mat-label>
-      <input matInput formControlName="equipo" placeholder="Ej: Impresora HP, Laptop #15">
-    </mat-form-field>
+      <div class="baja-container" *ngIf="mantenimientoForm.get('tipomantenimiento')?.value === 'Solicitud De Baja'">        
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>¿Por qué solicita baja?</mat-label>
+          <mat-select formControlName="motivo_baja">
+            <mat-option value="danio_total">Equipo con daño total (No reparable)</mat-option>
+            <mat-option value="obsoleto">Equipo obsoleto (Tecnologia antigua)</mat-option>
+            <mat-option value="software_desuso">Software en desuso / Licencia vencida</mat-option>
+            <mat-option value="reemplazo">Reemplazo por equipo nuevo</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
 
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Asunto</mat-label>
-      <input matInput formControlName="asunto">
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-label>Descripción detallada</mat-label>
-      <textarea matInput rows="5" formControlName="descripcion"></textarea>
-    </mat-form-field>
-
-    <div class="file-upload">
-      <label>Adjuntar evidencia (Imagen / Documento)</label>
-      <input type="file" (change)="onFileSelected($event)">
     </div>
 
+    <!-- DETALLE -->
+    <div class="section">
+      <h3>Detalle del Problema</h3>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Equipo</mat-label>
+        <input matInput formControlName="equipo" placeholder="Ej: Impresora HP, Laptop #15">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Asunto</mat-label>
+        <input matInput formControlName="asunto">
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Descripción</mat-label>
+        <textarea matInput rows="4" formControlName="descripcion"></textarea>
+      </mat-form-field>
+    </div>
+
+    <!-- ARCHIVOS -->
+    <div class="section">
+      <h3>Adjuntos</h3>
+      <div class="file-upload">
+        <input type="file" (change)="onFileSelected($event)">
+      </div>
+    </div>
+
+    <!-- BOTÓN -->
     <div class="button-container">
-      <button mat-raised-button color="primary" type="submit" [disabled]="mantenimientoForm.invalid">
-        <mat-icon>build</mat-icon> Guardar
+      <button 
+        mat-flat-button 
+        class="btn-save"
+        type="submit"
+        [disabled]="mantenimientoForm.invalid">
+    
+        <mat-icon>save</mat-icon>
+        Guardar Mantenimiento
+
       </button>
     </div>
-
   </form>
-</mat-card>
+</div>

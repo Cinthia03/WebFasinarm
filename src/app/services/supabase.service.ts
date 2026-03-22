@@ -27,15 +27,14 @@ export class SupabaseService {
       .from('mantenimiento')
       .select('*')
       .eq('id_mantenimiento', id)
-      .single();
+      .maybeSingle();
   }
 
   async createMantenimiento(data: any) {
     return await this.supabase
       .from('mantenimiento')
       .insert([data])
-      .select()
-      .single();
+      .select();
   }
 
   async updateMantenimiento(id: number, data: any) {
@@ -43,8 +42,7 @@ export class SupabaseService {
       .from('mantenimiento')
       .update(data)
       .eq('id_mantenimiento', id)
-      .select()
-      .single();
+      .select();
   }
 
   async deleteMantenimiento(id: number) {
