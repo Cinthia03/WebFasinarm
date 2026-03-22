@@ -1,8 +1,9 @@
 .footer {
-  width: 90%;
+  width: 100%;
+  box-sizing: border-box; 
   background: linear-gradient(90deg, #1e3c72, #2a5298);
   color: white;
-  padding: 20px 40px;
+  padding: 10px 40px;
   box-shadow: 0 -3px 10px rgba(0, 0, 0, 0.2);
   margin-top: auto;
 }
@@ -29,7 +30,6 @@
 .footer-center,
 .footer-right {
   text-align: center;
-  min-width: 200px;
 }
 
 .footer-center {
